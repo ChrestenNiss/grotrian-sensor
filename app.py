@@ -111,7 +111,7 @@ def postSensorData():
             docID = str(uuid.uuid4())
 
             if(data['sensorType'] == 'humidity'):
-                sval = data['sensorValue'].strip()
+                sval = int(data['sensorValue'].strip())
             elif(data['sensorType'] == 'temp'):
                 sval = float(data['sensorValue'].strip())
             elif(data['sensorType'] == 'accel'):

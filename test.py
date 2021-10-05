@@ -63,25 +63,25 @@ while True:
     requests.post(url, json = {
         'sensorGUID': hs1guid,
         'sensorType': hs1t,
-        'sensorValue': str(round(random.uniform(65,99)))+'%',
+        'sensorValue': str(round(random.uniform(65,99))),
         'sensorLoc': hs1l
     })
     requests.post(url, json = {
         'sensorGUID': hs2guid,
         'sensorType': hs2t,
-        'sensorValue': str(round(random.uniform(65,99)))+'%',
+        'sensorValue': str(round(random.uniform(65,99))),
         'sensorLoc': hs2l
     })
     requests.post(url, json = {
         'sensorGUID': hs3guid,
         'sensorType': hs3t,
-        'sensorValue': str(round(random.uniform(65,99)))+'%',
+        'sensorValue': str(round(random.uniform(65,99))),
         'sensorLoc': hs3l
     })
     requests.post(url, json = {
         'sensorGUID': hs4guid,
         'sensorType': hs4t,
-        'sensorValue': str(round(random.uniform(65,99)))+'%',
+        'sensorValue': str(round(random.uniform(65,99))),
         'sensorLoc': hs4l
     })
     requests.post(url, json = {
