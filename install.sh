@@ -5,7 +5,7 @@ then
     cd grotrian-sensor
     git pull
 else
-    git clone https://github.com/AlexanderADM/grotrian-sensor.git .
+    git clone https://github.com/AlexanderADM/grotrian-sensor.git
     cd grotrian-sensor
 fi
 
