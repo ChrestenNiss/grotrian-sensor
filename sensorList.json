@@ -1,0 +1,9 @@
+[{
+    "sensorGUID" : "1f20aef1-3734-402e-bcf5-7f44b9e26dc6",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "sensorGUID" : "a58f1b68-47b5-433e-bbf8-dd9f86e89420",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+}]

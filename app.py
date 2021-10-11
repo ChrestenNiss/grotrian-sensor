@@ -1,7 +1,7 @@
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos.partition_key import PartitionKey
-import datetime, uuid
+import datetime, uuid, json
 
 import flask
 from flask import request
@@ -40,6 +40,10 @@ else:
     ERROR_PART_KEY = config.get('DBINFO','error_part_key')
     ERROR_CONTAINER_ID = config.get('DBINFO','error_container_id')
 
+with open('sensorList.json') as f:
+    sensorList = json.load(f)
+
+
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>Local testing ground</h1>
@@ -71,13 +75,16 @@ def postSensorErrorData():
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
 
+            sens = sensorList[int(data['id'].strip())]
+
             sensor={
                 'id' : docID,
                 'partitionKey' : ERROR_PART_KEY,
                 'sourceName': SOURCE_NAME,
                 'sourceGUID': SOURCE_ID,
                 'sensorTimestamp' : currentDateTime,
-                'sensorErr' : data['sensorErr'],
+                'sensorGUID' : sens['sensorGUID'],
+                'sensorErr' : data['v'],
             }
 
             container.create_item(body=sensor)
@@ -109,24 +116,19 @@ def postSensorData():
             data = request.get_json()
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
-
-            if(data['sensorType'] == 'humidity'):
-                sval = int(data['sensorValue'].strip())
-            elif(data['sensorType'] == 'temp'):
-                sval = float(data['sensorValue'].strip())
-            elif(data['sensorType'] == 'accel'):
-                sval = int(data['sensorValue'].strip())
+            
+            sens = sensorList[int(data['id'].strip())]
 
             sensor={
                 'id' : docID,
-                'partitionKey' : data['sensorType'],
+                'partitionKey' : sens['sensorType'],
                 'sourceName': SOURCE_NAME,
                 'sourceGUID': SOURCE_ID,
                 'sensorTimestamp' : currentDateTime,
-                'sensorType' : data['sensorType'],
-                'sensorSource' : data['sensorLoc'],
-                'sensorGUID' : data['sensorGUID'],
-                'sensorValue' : sval
+                'sensorType' : sens['sensorType'],
+                'sensorSource' : sens['sensorSource'],
+                'sensorGUID' : sens['sensorGUID'],
+                'sensorValue' : float(data['v'].strip())
             }
 
             container.create_item(body=sensor)
