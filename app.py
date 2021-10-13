@@ -61,7 +61,7 @@ def postSensorErrorData():
             db = client.get_database_client(DATABASE_ID)
             print('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
-            container = db.create_container(id=ERROR_CONTAINER_ID, partition_key=PartitionKey(path='/partitionKey', analytical_storage_ttl=-1))
+            container = db.create_container(id=ERROR_CONTAINER_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
             print('Container with id \'{0}\' created'.format(CONTAINER_ID))
         except exceptions.CosmosResourceExistsError:
             container = db.get_container_client(ERROR_CONTAINER_ID)
@@ -74,16 +74,24 @@ def postSensorErrorData():
             data = request.get_json()
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
+            found = False
 
-            sens = sensorList[int(data['id'].strip())]
+            for s in sensorList:
+                if(int(data['id'].strip()) == int(s['id'].strip())):
+                    sens = sensorList[int(data['id'].strip())]
+                    found = True
+
+            if(not found):
+                return "No such sensor",404
 
             sensor={
                 'id' : docID,
-                'partitionKey' : ERROR_PART_KEY,
+                'partitionKey' : sens['sensorType']+"Error",
                 'sourceName': SOURCE_NAME,
                 'sourceGUID': SOURCE_ID,
                 'sensorTimestamp' : currentDateTime,
                 'sensorGUID' : sens['sensorGUID'],
+                'sensorSource': sens['sensorSource'],
                 'sensorErr' : data['v'],
             }
 
@@ -117,7 +125,15 @@ def postSensorData():
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
             
-            sens = sensorList[int(data['id'].strip())]
+            found = False
+
+            for s in sensorList:
+                if(int(data['id'].strip()) == int(s['id'].strip())):
+                    sens = sensorList[int(data['id'].strip())]
+                    found = True
+
+            if(not found):
+                return "No such sensor",404
 
             sensor={
                 'id' : docID,
