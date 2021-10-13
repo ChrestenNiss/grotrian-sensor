@@ -1,0 +1,279 @@
+[{
+	"ErrorID" : "16#8000",
+    "Description" : "Drive error, loss of \"Drive ready\"",
+	"Errors" : [{
+		"ErrorInfo" : "16#0001",
+		"Description" : "-"
+	}
+	],
+    "Remedy" : "Acknowledge error with instruction \"MC_Reset\"; provide drive signal; restart command, if necessary"
+},
+{
+    "ErrorID" : "16#8001",
+    "Description" : "Lower SW limit switch has been tripped",
+	"Errors" : [{
+		"ErrorInfo" : "16#000E",
+		"Description" : "The position of the lower SW limit switch was reached with the currently configured deceleration"
+	},
+    {
+        "ErrorInfo" : "16#000F",
+        "Description" : "The position of the lower SW limit switch was reached with the emergency stop deceleration"
+    }
+    ,
+    {
+        "ErrorInfo" : "16#0010",
+        "Description" : "The position of the lower SW limit switch was exceeded with the emergency stop deceleration"
+    }
+	],
+    "Remedy" : "Acknowledge the error with instruction \"MC_Reset\"; use a motion command to move the axis in the positive direction out of the range of the SW limit switch",
+    "ErrorReaction": "Remove enable"
+},
+{
+	"ErrorID" : "16#8002",
+    "Description" : "Upper SW limit switch has been tripped",
+	"Errors" : [{
+		"ErrorInfo" : "16#000E",
+		"Description" : "The position of the upper SW limit switch was reached with the currently configured deceleration"
+	},
+    {
+		"ErrorInfo" : "16#000F",
+		"Description" : "The position of the upper SW limit switch was reached with the emergency stop deceleration"
+	},
+    {
+		"ErrorInfo" : "16#0010",
+		"Description" : "The position of the upper SW limit switch was exceeded with the emergency stop deceleration"
+	}
+	],
+    "Remedy" : "Acknowledge the error with instruction \"MC_Reset\"; use a motion command to move the axis in the negative direction out of the range of the SW limit switch",
+    "ErrorReaction": "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#8003",
+    "Description" : "Lower HW limit switch was reached",
+	"Errors" : [{
+		"ErrorInfo" : "16#000E",
+		"Description" : "The lower HW limit switch was reached. The axis was stopped with the emergency stop deceleration.(During an active homing procedure, the reference point switch was not found)"
+	}
+	],
+    "Remedy" : "Acknowledge the error for an enabled axis with instruction \"MC_Reset\"; use a motion command to move the axis in the negative direction out of the range of the HW limit switch.",
+    "ErrorReaction": "For drive connection via PTO (Pulse Train Output): Stop with emergency stop ramp. For drive connection via PROFIdrive/analog output: Remove enable"
+}
+,
+{
+	"ErrorID" : "16#8004",
+    "Description" : "Upper HW limit switch was reached",
+	"Errors" : [{
+		"ErrorInfo" : "16#000E",
+		"Description" : "The upper HW limit switch has been reached. The axis was stopped with the emergency stop deceleration.(During an active homing procedure, the reference point switch was not found)"
+	}
+	],
+    "Remedy" : "Acknowledge the error for an enabled axis with instruction \"MC_Reset\"; use a motion command to move the axis in the negative direction out of the range of the HW limit switch.",
+    "ErrorReaction": "For drive connection via PTO (Pulse Train Output): Stop with emergency stop ramp. For drive connection via PROFIdrive/analog output: Remove enable"
+}
+,
+{
+	"ErrorID" : "16#8005",
+    "Description" : "PTO/HSC are already being used by another axis",
+	"Errors" : [{
+		"ErrorInfo" : "16#0001",
+		"Description" : "-"
+	}
+	],
+    "Remedy" : "The axis was configured incorrectly: Correct the configuration of the PTO (Pulse Train Output) / HSC (High Speed Counter) and download it to the controller. More than one axis is to run with one PTO : Another axis is using the PTO / HSC. If the current axis is to assume the control, the other axis must be disabled with \"MC_Power\" Enable = FALSE.",
+    "ErrorReaction": "-"
+}
+,
+{
+	"ErrorID" : "16#8006",
+    "Description" : "A communication error has occurred in the axis control panel ",
+	"Errors" : [{
+		"ErrorInfo" : "16#0012",
+		"Description" : "A timeout has occured."
+	}
+	],
+    "Remedy" : "Check the cable connection and press the \"Manual control\" button again",
+    "ErrorReaction": "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#8007",
+    "Description" : "The axis cannot be enabled",
+	"Errors" : [{
+		"ErrorInfo" : "16#0025",
+		"Description" : "Restarting",
+        "Remedy": "Wait until the axis restart is complete."
+	},
+    {
+		"ErrorInfo" : "16#0026",
+		"Description" : "Executing loading process in RUN mode",
+        "Remedy": "Wait until loading process is complete."
+	}
+	],
+    "ErrorReaction": "-"
+}
+,
+{
+	"ErrorID" : "16#8008",
+    "Description" : "Invalid direction of motion",
+	"Errors" : [{
+		"ErrorInfo" : "16#002E",
+		"Description" : "The selected motion direction is not allowed."
+	},
+    {
+		"ErrorInfo" : "16#002F",
+		"Description" : "A reversing motion is not possible with the selected motion direction."
+	}
+	],
+    "Remedy" : "Adjust the motion direction and restart the command. Adjust the allowed direction of rotation in the technology object configuration under \"Extended parameters > Mechanics\". Restart the command.",
+    "ErrorReaction": "-"
+}
+,
+{
+	"ErrorID" : "16#8009",
+    "Description" : "Reference switch/encoder zero mark not found",
+	"Errors" : [{
+		"ErrorInfo" : "16#0033",
+		"Description" : "Error in the configuration, hardware or installation of the encoder or at the homing switch."
+	}
+	],
+    "Remedy" : "Connect a suitable device.Check the device (I/Os).Compare the configuration of HW Config and the technology object.",
+    "ErrorReaction": "Stop with emergency stop ramp"
+}
+,
+{
+	"ErrorID" : "16#800A",
+    "Description" : "Alarm message from encoder",
+	"Errors" : [{
+		"ErrorInfo" : "16#0001",
+		"Description" : "-",
+        "Remedy": "Check the device with regard to function, connections and I/Os."
+	},{
+		"ErrorInfo" : "16#0034",
+		"Description" : "Hardware error at encoder",
+        "Remedy": "Check the device with regard to function, connections and I/Os."
+	},{
+		"ErrorInfo" : "16#0035",
+		"Description" : "Encoder dirty",
+        "Remedy": "Check the device with regard to function, connections and I/Os."
+	},{
+		"ErrorInfo" : "16#0036",
+		"Description" : "Error during reading of encoder absolute value",
+        "Remedy": "Compare the encoder type in the drive or encoder parameter P979 with the configuration data of the technology object."
+	},{
+		"ErrorInfo" : "16#0037",
+		"Description" : "Zero mark monitoring of the encoder",
+        "Remedy": "Encoder reports error in zero mark monitoring (fault code 0x0002 in Gx_XIST2, see PROFIdrive profile).Check the plant for electromagnetic compatibility (EMC)."
+	},{
+		"ErrorInfo" : "16#0038",
+		"Description" : "Encoder is in \"Parking\" state",
+        "Remedy": "Search for the cause of the error in the connected drive or encoder. Check whether the error message was possibly triggered by a commissioning action at the drive or encoder."
+	},{
+		"ErrorInfo" : "16#0040",
+		"Description" : "PROFIdrive: Encoder on bus failed ( station failure ).",
+        "Remedy": "Check the device with regard to function, connections and I/Os."
+	}
+	],
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#800B",
+    "Description" : "Range violation of the position",
+	"Errors" : [{
+		"ErrorInfo" : "16#0039",
+		"Description" : "Range violation in positive direction",
+        "Remedy": "Home the axis to a valid actual value range."
+	},
+    {
+		"ErrorInfo" : "16#003A",
+		"Description" : "Range violation in negative direction",
+        "Remedy": "Home the axis to a valid actual value range."
+	},
+    {
+		"ErrorInfo" : "16#003B",
+		"Description" : "The change of the actual position in a position control clock cycle is longer than the length.",
+        "Remedy": "Adjust the modulo length of the employed encoder."
+	}
+	],
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#800C",
+    "Description" : "Alarm message from drive",
+	"Errors" : [{
+		"ErrorInfo" : "16#0001",
+		"Description" : "-"
+	},{
+		"ErrorInfo" : "16#003C",
+		"Description" : "PROFIdrive: Drive signal \"Control requested\" failed."
+	},{
+		"ErrorInfo" : "16#003D",
+		"Description" : "PROFIdrive/analog drive connection: Drive has shut down."
+	},{
+		"ErrorInfo" : "16#003E",
+		"Description" : "PROFIdrive: Drive on bus failed (station failure)"
+	}
+	],
+    "Remedy" : "Check the device with regard to function, connections and I/Os. In the \"Tuning\" dialog box, select a smaller gain (Kv).",
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#800D",
+    "Description" : "The permitted following error was exceeded",
+	"Errors" : [{
+		"ErrorInfo" : "16#0001",
+		"Description" : "-"
+	}
+	],
+    "Remedy" : "Check the configuration of the control loop.Check the direction signal of the encoder.Check the configuration of following error monitoring.",
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "16#800E",
+    "Description" : "Error at the hardware limit switch",
+	"Errors" : [{
+		"ErrorInfo" : "",
+		"Description" : ""
+	}
+	],
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "",
+    "Description" : "",
+	"Errors" : [{
+		"ErrorInfo" : "",
+		"Description" : ""
+	}
+	],
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "",
+    "Description" : "",
+	"Errors" : [{
+		"ErrorInfo" : "",
+		"Description" : ""
+	}
+	],
+    "ErrorReaction" : "Remove enable"
+}
+,
+{
+	"ErrorID" : "",
+    "Description" : "",
+	"Errors" : [{
+		"ErrorInfo" : "",
+		"Description" : ""
+	}
+	],
+    "Remedy" : "",
+    "ErrorReaction" : ""
+}
+]
