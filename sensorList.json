@@ -1,11 +1,54 @@
 [{
     "id" : "0",
+    "eID" : "100",
     "sensorGUID" : "1f20aef1-3734-402e-bcf5-7f44b9e26dc6",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "1",
+    "eID" : "101",
     "sensorGUID" : "a58f1b68-47b5-433e-bbf8-dd9f86e89420",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "2",
+    "eID" : "151",
+    "sensorGUID" : "d256f955-3a39-4c13-91f8-a378f0f94724",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "3",
+    "sensorGUID" : "1f8314a4-3e60-4fd9-9bd6-937bdd33a732",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "4",
+    "sensorGUID" : "27b2d9a4-4acf-4ff7-83bc-b159d1083c55",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "5",
+    "sensorGUID" : "7ad04ba0-5e3d-40cc-913c-1f3fc911f34b",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "6",
+    "sensorGUID" : "92122ef3-b94f-48af-b357-7bd4bcc80d4c",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "7",
+    "sensorGUID" : "4e53553a-c3a8-435a-8b1e-de5d1bd3cdbf",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "8",
+    "sensorGUID" : "2a9820bf-7c64-4f0c-86f3-bbd1e83f5053",
+    "sensorType" : "temperature",
+    "sensorSource" : "Dev Office"
+},{
+    "id" : "9",
+    "sensorGUID" : "c3c92a2b-2c7b-4200-9b39-c29fcb845302",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 }]

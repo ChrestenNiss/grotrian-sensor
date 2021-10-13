@@ -21,9 +21,9 @@ if not exists('config.ini'):
     "container_id": input("Enter container id/name: "),
     "partition_key": input("Enter partition key/name: "),
     "error_container_id": input("Enter error container key/name: "),
-    "error_part_key": input("Enter error partition key/name: "),
     "source_id": input("Enter source unique identifier: "),
-    "source_name": input("Enter source name: ")
+    "source_name": input("Enter source name: "),
+    "occasional_container_id": input("Enter occasional container key/name: "),
     }
     with open('config.ini', 'w') as conf:
         config.write(conf)
@@ -37,8 +37,8 @@ else:
     PARTITION_KEY = config.get('DBINFO','partition_key')
     SOURCE_ID = config.get('DBINFO','source_id')
     SOURCE_NAME = config.get('DBINFO','source_name')
-    ERROR_PART_KEY = config.get('DBINFO','error_part_key')
     ERROR_CONTAINER_ID = config.get('DBINFO','error_container_id')
+    OC_CONT_ID = config.get('DBINFO','occasional_container_id')
 
 with open('sensorList.json') as f:
     sensorList = json.load(f)
@@ -52,6 +52,12 @@ def home():
 @app.route('/S7/in/error', methods=['POST'])
 def postSensorErrorData():
     client = cosmos_client.CosmosClient(HOST, {'masterKey': MASTER_KEY}, user_agent="CosmosDBPythonQuickstart", user_agent_overwrite=True)
+    data = request.get_json()
+
+    if(int(data['id'].strip())>150):
+        USING_CONT_ID = OC_CONT_ID
+    else:
+        USING_CONT_ID = ERROR_CONTAINER_ID
 
     try:
         try:
@@ -61,32 +67,32 @@ def postSensorErrorData():
             db = client.get_database_client(DATABASE_ID)
             print('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
-            container = db.create_container(id=ERROR_CONTAINER_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
-            print('Container with id \'{0}\' created'.format(CONTAINER_ID))
+            container = db.create_container(id=USING_CONT_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
+            print('Container with id \'{0}\' created'.format(USING_CONT_ID))
         except exceptions.CosmosResourceExistsError:
-            container = db.get_container_client(ERROR_CONTAINER_ID)
-            print('Container with id \'{0}\' was found'.format(CONTAINER_ID))
+            container = db.get_container_client(USING_CONT_ID)
+            print('Container with id \'{0}\' was found'.format(USING_CONT_ID))
 
     except exceptions.CosmosHttpResponseError as e:
         print('\nCreating sensor data has caught an error. {0}'.format(e.message))
 
     finally:
-            data = request.get_json()
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
             found = False
 
             for s in sensorList:
-                if(int(data['id'].strip()) == int(s['id'].strip())):
-                    sens = sensorList[int(data['id'].strip())]
-                    found = True
+                if('eID' in s):
+                    if(int(data['id'].strip()) == int(s['eID'].strip())):
+                        sens = s
+                        found = True
 
             if(not found):
                 return "No such sensor",404
 
             sensor={
                 'id' : docID,
-                'partitionKey' : sens['sensorType']+"Error",
+                'partitionKey' : sens['sensorType'],
                 'sourceName': SOURCE_NAME,
                 'sourceGUID': SOURCE_ID,
                 'sensorTimestamp' : currentDateTime,
