@@ -4,12 +4,14 @@ function UOI () {
 	shopt -s dotglob
 	mv -u grotrian-sensor/* ./
 	rm -fr grotrian-sensor
+	git reset --hard
 	git pull --force
 	git checkout .
 	pip3 install -r requirements.txt
 }
 
 function run () {
+	git fetch
 	if [ ! -f "app.py" ]; then
 		echo "Python app not found, running update/install function."
 		UOI
