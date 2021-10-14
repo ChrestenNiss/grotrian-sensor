@@ -12,32 +12,37 @@
     "sensorSource" : "Dev Office"
 },{
     "id" : "2",
-    "eID" : "151",
+    "eID" : "102",
     "sensorGUID" : "d256f955-3a39-4c13-91f8-a378f0f94724",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "3",
+    "eID" : "152",
     "sensorGUID" : "1f8314a4-3e60-4fd9-9bd6-937bdd33a732",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "4",
+    "eID" : "157",
     "sensorGUID" : "27b2d9a4-4acf-4ff7-83bc-b159d1083c55",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "5",
+    "eID" : "168",
     "sensorGUID" : "7ad04ba0-5e3d-40cc-913c-1f3fc911f34b",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "6",
+    "eID" : "169",
     "sensorGUID" : "92122ef3-b94f-48af-b357-7bd4bcc80d4c",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
 },{
     "id" : "7",
+    "eID" : "170",
     "sensorGUID" : "4e53553a-c3a8-435a-8b1e-de5d1bd3cdbf",
     "sensorType" : "temperature",
     "sensorSource" : "Dev Office"
