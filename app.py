@@ -136,9 +136,10 @@ def postSensorData():
             found = False
 
             for s in sensorList:
-                if(int(data['id'].strip()) == int(s['id'].strip())):
-                    sens = sensorList[int(data['id'].strip())]
-                    found = True
+                if('id' in s):
+                    if(int(data['id'].strip()) == int(s['id'].strip())):
+                        sens = sensorList[int(data['id'].strip())]
+                        found = True
 
             if(not found):
                 return "No such sensor",404
