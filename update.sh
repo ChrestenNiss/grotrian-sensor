@@ -1,5 +1,8 @@
+#!/usr/bin/env bash
 session="sensorInput"
+workingDir="/home/pi/grotrian-sensor"
 function UOI () {
+	cd $workingDir
 	git clone https://github.com/AlexanderADM/grotrian-sensor.git
 	shopt -s dotglob
 	mv -u grotrian-sensor/* ./
