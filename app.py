@@ -138,7 +138,7 @@ def postSensorData():
             for s in sensorList:
                 if('id' in s):
                     if(int(data['id'].strip()) == int(s['id'].strip())):
-                        sens = sensorList[int(data['id'].strip())]
+                        sens = s
                         found = True
 
             if(not found):
