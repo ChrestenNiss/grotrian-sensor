@@ -55,8 +55,10 @@ def postSensorErrorData():
     data = request.get_json()
     if(int(data['id'].strip())>150):
         USING_CONT_ID = OC_CONT_ID
+        eval = data['v']
     else:
         USING_CONT_ID = ERROR_CONTAINER_ID
+        eval = hex(data['v'])
 
     try:
         try:
@@ -97,7 +99,8 @@ def postSensorErrorData():
                 'sensorTimestamp' : currentDateTime,
                 'sensorGUID' : sens['sensorGUID'],
                 'sensorSource': sens['sensorSource'],
-                'sensorErr' : data['v'],
+                'sensorType': sens['sensorType'],
+                'sensorErr' : eval,
             }
 
             container.create_item(body=sensor)
