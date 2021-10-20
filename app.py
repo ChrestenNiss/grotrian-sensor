@@ -1,7 +1,7 @@
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos.partition_key import PartitionKey
-import datetime, uuid, json
+import datetime, uuid, json, logging, os
 
 import flask
 from flask import request
@@ -43,6 +43,15 @@ else:
 with open('sensorList.json') as f:
     sensorList = json.load(f)
 
+gbSize = 1073741824
+log_size = os.stat('requests.log')
+
+if(log_size.st_size > gbSize):
+    os.remove('requests.log')
+
+logger = logging.getLogger('werkzeug')
+handler = logging.FileHandler('requests.log')
+logger.addHandler(handler)
 
 @app.route('/', methods=['GET'])
 def home():
