@@ -69,12 +69,13 @@ def home():
 def postSensorErrorData():
     client = cosmos_client.CosmosClient(HOST, {'masterKey': MASTER_KEY}, user_agent="CosmosDBPythonQuickstart", user_agent_overwrite=True)
     data = request.get_json()
+    
     if(int(data['id'].strip())>150):
         USING_CONT_ID = OC_CONT_ID
-        eval = data['v']
+        eval = int(data['v'].strip())
     else:
         USING_CONT_ID = ERROR_CONTAINER_ID
-        eval = hex(data['v'])
+        eval = hex(int(data['v'].strip()))
 
     try:
         try:
@@ -97,10 +98,16 @@ def postSensorErrorData():
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
             found = False
+            locID
 
             for s in sensorList:
                 if('eID' in s):
-                    if(int(data['id'].strip()) == int(s['eID'].strip())):
+                    if type(s['eID']) is int:
+                        locID = s['eID']
+                    else:
+                        locID = int(s['eID'].strip())
+                    
+                    if(int(data['id'].strip()) == locID):
                         sens = s
                         found = True
 
@@ -153,10 +160,16 @@ def postSensorData():
             docID = str(uuid.uuid4())
             
             found = False
+            locID
 
             for s in sensorList:
                 if('id' in s):
-                    if(int(data['id'].strip()) == int(s['id'].strip())):
+                    if type(s['id']) is int:
+                        locID = s['id']
+                    else:
+                        locID = int(s['id'].strip())
+
+                    if(int(data['id'].strip()) == locID):
                         sens = s
                         found = True
 
