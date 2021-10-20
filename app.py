@@ -1,7 +1,7 @@
 import azure.cosmos.cosmos_client as cosmos_client
 import azure.cosmos.exceptions as exceptions
 from azure.cosmos.partition_key import PartitionKey
-import datetime, uuid, json, logging, os
+import datetime, uuid, json, logging, os, sys
 
 import flask
 from flask import request
@@ -49,9 +49,16 @@ log_size = os.stat('requests.log')
 if(log_size.st_size > gbSize):
     os.remove('requests.log')
 
-logger = logging.getLogger('werkzeug')
-handler = logging.FileHandler('requests.log')
-logger.addHandler(handler)
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
+
+stream = logging.StreamHandler(sys.stdout)
+stream.setLevel(logging.DEBUG)
+streamformat = logging.Formatter("%(asctime)s:%(levelname)s:%(message)s")
+stream.setFormatter(streamformat)
+filehandler = logging.FileHandler('requests.log')
+
+root.addHandler(filehandler)
 
 @app.route('/', methods=['GET'])
 def home():
@@ -72,19 +79,19 @@ def postSensorErrorData():
     try:
         try:
             db = client.create_database(id=DATABASE_ID)
-            #print('Database with id \'{0}\' created'.format(DATABASE_ID))
+            #root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
         except exceptions.CosmosResourceExistsError:
             db = client.get_database_client(DATABASE_ID)
-            #print('Database with id \'{0}\' was found'.format(DATABASE_ID))
+            #root.debug('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
             container = db.create_container(id=USING_CONT_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
-            #print('Container with id \'{0}\' created'.format(USING_CONT_ID))
+            #root.debug('Container with id \'{0}\' created'.format(USING_CONT_ID))
         except exceptions.CosmosResourceExistsError:
             container = db.get_container_client(USING_CONT_ID)
-            #print('Container with id \'{0}\' was found'.format(USING_CONT_ID))
+            #root.debug('Container with id \'{0}\' was found'.format(USING_CONT_ID))
 
     except exceptions.CosmosHttpResponseError as e:
-        print('\nCreating sensor data has caught an error. {0}'.format(e.message))
+        root.debug('\nCreating sensor data has caught an error. {0}'.format(e.message))
 
     finally:
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
@@ -113,9 +120,9 @@ def postSensorErrorData():
             }
 
             container.create_item(body=sensor)
-            print("\nSuccessfully inserted sensor error into container \'"+ USING_CONT_ID +"\' with data: ")
-            print(data)
-            print("End of post request data.")
+            root.debug("\nSuccessfully inserted sensor error into container \'"+ USING_CONT_ID +"\' with data: ")
+            root.debug(data)
+            root.debug("End of post request data.")
             return 'Ok',200
 
 @app.route('/S7/in/sensor', methods=['POST'])
@@ -125,19 +132,19 @@ def postSensorData():
     try:
         try:
             db = client.create_database(id=DATABASE_ID)
-            #print('Database with id \'{0}\' created'.format(DATABASE_ID))
+            #root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
         except exceptions.CosmosResourceExistsError:
             db = client.get_database_client(DATABASE_ID)
-            #print('Database with id \'{0}\' was found'.format(DATABASE_ID))
+            #root.debug('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
             container = db.create_container(id=CONTAINER_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
-            #print('Container with id \'{0}\' created'.format(CONTAINER_ID))
+            #root.debug('Container with id \'{0}\' created'.format(CONTAINER_ID))
         except exceptions.CosmosResourceExistsError:
             container = db.get_container_client(CONTAINER_ID)
-            #print('Container with id \'{0}\' was found'.format(CONTAINER_ID))
+            #root.debug('Container with id \'{0}\' was found'.format(CONTAINER_ID))
 
     except exceptions.CosmosHttpResponseError as e:
-        print('\nCreating sensor data has caught an error. {0}'.format(e.message))
+        root.debug('\nCreating sensor data has caught an error. {0}'.format(e.message))
 
     finally:
             data = request.get_json()
@@ -169,9 +176,9 @@ def postSensorData():
             }
 
             container.create_item(body=sensor)
-            print("\nSuccessfully inserted sensor into \'"+ CONTAINER_ID + "\' with data: ")
-            print(data)
-            print("End of post request data.")
+            root.debug("\nSuccessfully inserted sensor into \'"+ CONTAINER_ID + "\' with data: ")
+            root.debug(data)
+            root.debug("End of post request data.")
             return 'Ok',200
     
 if __name__ == "__main__":
