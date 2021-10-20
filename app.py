@@ -98,7 +98,7 @@ def postSensorErrorData():
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
             found = False
-            locID
+            locID = 0
 
             for s in sensorList:
                 if('eID' in s):
@@ -160,7 +160,7 @@ def postSensorData():
             docID = str(uuid.uuid4())
             
             found = False
-            locID
+            locID = 0
 
             for s in sensorList:
                 if('id' in s):
