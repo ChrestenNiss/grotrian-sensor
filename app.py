@@ -52,6 +52,8 @@ if(log_size.st_size > gbSize):
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 
+azlog = logging.getLogger('azure')
+azlog.setLevel(logging.WARN)
 stream = logging.StreamHandler(sys.stdout)
 stream.setLevel(logging.DEBUG)
 streamformat = logging.Formatter("%(asctime)s:%(levelname)s:%(message)s")
