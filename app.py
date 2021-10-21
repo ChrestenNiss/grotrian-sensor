@@ -23,7 +23,7 @@ if not exists('config.ini'):
     "error_container_id": input("Enter error container key/name: "),
     "source_id": input("Enter source unique identifier: "),
     "source_name": input("Enter source name: "),
-    "occasional_container_id": input("Enter occasional container key/name: "),
+    "occasional_container_id": input("Enter timed container key/name: "),
     }
     with open('config.ini', 'w') as conf:
         config.write(conf)
@@ -40,8 +40,8 @@ else:
     ERROR_CONTAINER_ID = config.get('DBINFO','error_container_id')
     OC_CONT_ID = config.get('DBINFO','occasional_container_id')
 
-with open('sensorList.json') as f:
-    sensorList = json.load(f)
+if not exists('requests.log'):
+    open('requests.log','x').close()
 
 gbSize = 1073741824
 log_size = os.stat('requests.log')
@@ -62,6 +62,15 @@ filehandler = logging.FileHandler('requests.log')
 
 root.addHandler(filehandler)
 
+
+if exists('sensorList.json'):
+    with open('sensorList.json') as f:
+        sensorList = json.load(f)
+else:
+    open('sensorList.json','x').close()
+    root.debug('No sensor list file present, created empty file to prevent execution failure, restart the script once the sensor list has been created.')
+
+
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>Local testing ground</h1>
@@ -70,25 +79,29 @@ def home():
 @app.route('/S7/in/error', methods=['POST'])
 def postSensorErrorData():
     client = cosmos_client.CosmosClient(HOST, {'masterKey': MASTER_KEY}, user_agent="CosmosDBPythonQuickstart", user_agent_overwrite=True)
-    data = request.get_json()
     
-    if(int(data['id'].strip())>150):
+    data = request.get_json()
+    using_id = int(data['id'].strip())
+
+    if(using_id>=150):
         USING_CONT_ID = OC_CONT_ID
         eval = int(data['v'].strip())
+        root.debug("Initiating timed sensor data input:\n ID: {0}\tValue: {1}".format(using_id,eval))
     else:
         USING_CONT_ID = ERROR_CONTAINER_ID
         eval = hex(int(data['v'].strip()))
+        root.debug("Initiating error sensor data input:\n ID: {0}\tValue: {1}".format(using_id,eval))
 
     try:
         try:
             db = client.create_database(id=DATABASE_ID)
-            #root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
+            root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
         except exceptions.CosmosResourceExistsError:
             db = client.get_database_client(DATABASE_ID)
             #root.debug('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
             container = db.create_container(id=USING_CONT_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
-            #root.debug('Container with id \'{0}\' created'.format(USING_CONT_ID))
+            root.debug('Container with id \'{0}\' created'.format(USING_CONT_ID))
         except exceptions.CosmosResourceExistsError:
             container = db.get_container_client(USING_CONT_ID)
             #root.debug('Container with id \'{0}\' was found'.format(USING_CONT_ID))
@@ -109,11 +122,14 @@ def postSensorErrorData():
                     else:
                         locID = int(s['eID'].strip())
                     
-                    if(int(data['id'].strip()) == locID):
+                    if(using_id == locID):
                         sens = s
                         found = True
+                        root.debug("Sensor has been found in the local list.\n ID: {0}".format(using_id))
+                        root.debug(sens)
 
             if(not found):
+                root.debug("Sensor ID: {0} cannot be found within the local sensorlist. Check the list and try again.".format(using_id))
                 return "No such sensor",404
 
             sensor={
@@ -129,9 +145,7 @@ def postSensorErrorData():
             }
 
             container.create_item(body=sensor)
-            root.debug("\nSuccessfully inserted sensor error into container \'"+ USING_CONT_ID +"\' with data: ")
-            root.debug(data)
-            root.debug("End of post request data.")
+            root.debug("\nSuccessfully inserted sensor error into container {0} with data:\n {1} \nEnd of post request data.".format(USING_CONT_ID,data))
             return 'Ok',200
 
 @app.route('/S7/in/sensor', methods=['POST'])
@@ -141,13 +155,13 @@ def postSensorData():
     try:
         try:
             db = client.create_database(id=DATABASE_ID)
-            #root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
+            root.debug('Database with id \'{0}\' created'.format(DATABASE_ID))
         except exceptions.CosmosResourceExistsError:
             db = client.get_database_client(DATABASE_ID)
             #root.debug('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
             container = db.create_container(id=CONTAINER_ID, partition_key=PartitionKey(path='/partitionKey'), analytical_storage_ttl=-1)
-            #root.debug('Container with id \'{0}\' created'.format(CONTAINER_ID))
+            root.debug('Container with id \'{0}\' created'.format(CONTAINER_ID))
         except exceptions.CosmosResourceExistsError:
             container = db.get_container_client(CONTAINER_ID)
             #root.debug('Container with id \'{0}\' was found'.format(CONTAINER_ID))
@@ -157,12 +171,14 @@ def postSensorData():
 
     finally:
             data = request.get_json()
+            using_id = int(data['id'].strip())
 
             currentDateTime = datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")
             docID = str(uuid.uuid4())
             
             found = False
             locID = 0
+            root.debug("Initiating sensor data input:\n ID: {0} \tValue: {1}".format(using_id,data['v']))
 
             for s in sensorList:
                 if('id' in s):
@@ -171,11 +187,14 @@ def postSensorData():
                     else:
                         locID = int(s['id'].strip())
 
-                    if(int(data['id'].strip()) == locID):
+                    if(using_id == locID):
                         sens = s
                         found = True
+                        root.debug("Sensor has been found in the local list.\n ID: {0}".format(using_id))
+                        root.debug(sens)
 
             if(not found):
+                root.debug("Sensor ID: {0} cannot be found within the local sensorlist. Check the list and try again.".format(using_id))
                 return "No such sensor",404
 
             sensor={
@@ -191,9 +210,7 @@ def postSensorData():
             }
 
             container.create_item(body=sensor)
-            root.debug("\nSuccessfully inserted sensor into \'"+ CONTAINER_ID + "\' with data: ")
-            root.debug(data)
-            root.debug("End of post request data.")
+            root.debug("\nSuccessfully inserted sensor into {0} with data: \n {1} \nEnd of post request data.".format(CONTAINER_ID,data))
             return 'Ok',200
     
 if __name__ == "__main__":
