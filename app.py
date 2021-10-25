@@ -43,24 +43,35 @@ else:
 if not exists('requests.log'):
     open('requests.log','x').close()
 
-gbSize = 1073741824
-log_size = os.stat('requests.log')
+if not exists('actions.log'):
+    open('actions.log','x').close()
 
-if(log_size.st_size > gbSize):
+gbSize = 1073741824
+
+if(os.stat('requests.log').st_size > gbSize):
     os.remove('requests.log')
+
+if(os.stat('actions.log').st_size > gbSize):
+    os.remove('actions.log')
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 
-azlog = logging.getLogger('azure')
-azlog.setLevel(logging.WARN)
+applog = logging.getLogger("actionlogger")
+applog.setLevel(logging.DEBUG)
+
+logging.getLogger('azure').setLevel(logging.ERROR)
 stream = logging.StreamHandler(sys.stdout)
 stream.setLevel(logging.DEBUG)
 streamformat = logging.Formatter("%(asctime)s:%(levelname)s:%(message)s")
 stream.setFormatter(streamformat)
-filehandler = logging.FileHandler('requests.log')
 
-root.addHandler(filehandler)
+rootfilehandler = logging.FileHandler('requests.log')
+actionfilehandler = logging.FileHandler('actions.log')
+
+root.addHandler(rootfilehandler)
+applog.addHandler(actionfilehandler)
+actionLog = []
 
 
 if exists('sensorList.json'):
@@ -86,11 +97,11 @@ def postSensorErrorData():
     if(using_id>=150):
         USING_CONT_ID = OC_CONT_ID
         eval = int(data['v'].strip())
-        root.debug("Initiating timed sensor data input:\n ID: {0}\tValue: {1}".format(using_id,eval))
+        actionLog.append("LOCAL-ID{0} [RID:{0}\tVal:{1}] - {2}".format(using_id,eval,datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")))
     else:
         USING_CONT_ID = ERROR_CONTAINER_ID
         eval = hex(int(data['v'].strip()))
-        root.debug("Initiating error sensor data input:\n ID: {0}\tValue: {1}".format(using_id,eval))
+        actionLog.append("LOCAL-ID{0} [RID:{0}\tVal:{1}] - {2}".format(using_id,eval,datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S")))
 
     try:
         try:
@@ -125,11 +136,13 @@ def postSensorErrorData():
                     if(using_id == locID):
                         sens = s
                         found = True
-                        root.debug("Sensor has been found in the local list.\n ID: {0}".format(using_id))
-                        root.debug(sens)
+                        actionLog.append("[Found LOCAL-ID{0} within local sensor list]".format(using_id))
 
             if(not found):
-                root.debug("Sensor ID: {0} cannot be found within the local sensorlist. Check the list and try again.".format(using_id))
+                actionLog.append("[ LOCAL-ID{0} cannot be found within the local sensorlist ]".format(using_id))
+                actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id,currentDateTime))
+                applog.debug("\n".join(actionLog))
+                actionLog.clear()
                 return "No such sensor",404
 
             sensor={
@@ -145,7 +158,11 @@ def postSensorErrorData():
             }
 
             container.create_item(body=sensor)
-            root.debug("\nSuccessfully inserted sensor error into container {0} with data:\n {1} \nEnd of post request data.".format(USING_CONT_ID,data))
+            actionLog.append("[Successfully inserted sensor into container {0} with data:] \n[{1}]".format(USING_CONT_ID,data))
+            actionLog.append("[Post processed data for LOCAL-ID{0} inserted as:]\n\t{1}".format(using_id,"\n\t".join("[{} : {}]".format(k,v) for k,v in sensor.items())))
+            actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id,currentDateTime))
+            applog.debug("\n".join(actionLog))
+            actionLog.clear()
             return 'Ok',200
 
 @app.route('/S7/in/sensor', methods=['POST'])
@@ -178,7 +195,7 @@ def postSensorData():
             
             found = False
             locID = 0
-            root.debug("Initiating sensor data input:\n ID: {0} \tValue: {1}".format(using_id,data['v']))
+            actionLog.append("LOCAL-ID{0} [RID:{0}\tVal:{1}] - {2}".format(using_id,data['v'].strip(),currentDateTime))
 
             for s in sensorList:
                 if('id' in s):
@@ -190,11 +207,13 @@ def postSensorData():
                     if(using_id == locID):
                         sens = s
                         found = True
-                        root.debug("Sensor has been found in the local list.\n ID: {0}".format(using_id))
-                        root.debug(sens)
+                        actionLog.append("[Found LOCAL-ID{0} within local sensor list]".format(using_id))
 
             if(not found):
-                root.debug("Sensor ID: {0} cannot be found within the local sensorlist. Check the list and try again.".format(using_id))
+                actionLog.append("[ LOCAL-ID{0} cannot be found within the local sensorlist ]".format(using_id))
+                actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id,currentDateTime))
+                applog.debug("\n".join(actionLog))
+                actionLog.clear()
                 return "No such sensor",404
 
             sensor={
@@ -210,7 +229,11 @@ def postSensorData():
             }
 
             container.create_item(body=sensor)
-            root.debug("\nSuccessfully inserted sensor into {0} with data: \n {1} \nEnd of post request data.".format(CONTAINER_ID,data))
+            actionLog.append("[Successfully inserted sensor into container {0} with data:] \n[{1}]".format(CONTAINER_ID,data))
+            actionLog.append("[Post processed data for LOCAL-ID{0} inserted as:]\n\t{1}".format(using_id,"\n\t".join("[{} : {}]".format(k,v) for k,v in sensor.items())))
+            actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id,currentDateTime))
+            applog.debug("\n".join(actionLog))
+            actionLog.clear()
             return 'Ok',200
     
 if __name__ == "__main__":
