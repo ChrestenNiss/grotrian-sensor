@@ -22,7 +22,7 @@ fi
 
 function UOI () {
 	cd $workingDir
-	git clone https://github.com/AlexanderADM/grotrian-sensor.git
+	git clone https://github.com/ChrestenNiss/grotrian-sensor.git
 	shopt -s dotglob
 	mv -u grotrian-sensor/* ./
 	rm -fr grotrian-sensor
