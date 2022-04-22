@@ -121,7 +121,6 @@ def postSensorErrorData():
     # Instantiate locally used variables
     data = request.get_json()
     using_id = int(data['id'].strip())
-    client = getCosmosClient()
     erval = 0
     currentDateTime = datetime.datetime.now()
     docID = str(uuid.uuid4())
@@ -154,6 +153,18 @@ def postSensorErrorData():
         actionLog.clear()
         return "No such sensor", 404
 
+    # Insert the sensor after processing into the database
+    # Check sensor ID
+    # If its below 150 it is a normal error sensor and it is sent to the error container
+    # Its value is also converted to a hexadecimal format for easy lookup
+    # If its above 150 it is a timed sensor and sent to the appropriate container
+    if(using_id >= 150):
+        containerID = "{0}_{1}_timed".format(SOURCE_NAME.strip().replace(" ", "_").lower(), sens['sensorType'])
+        erval = int(data['v'].strip())
+    else:
+        containerID = "{0}_errors".format(SOURCE_NAME.strip().replace(" ", "_").lower())
+        erval = hex(int(data['v'].strip()))
+        
     # Create sensor structure for the database
     sensor = {
         'id': docID,
@@ -171,32 +182,18 @@ def postSensorErrorData():
         'sensorErr': erval,
     }
 
-    # Insert the sensor after processing into the database
-    # Check sensor ID
-    # If its below 150 it is a normal error sensor and it is sent to the error container
-    # Its value is also converted to a hexadecimal format for easy lookup
-    # If its above 150 it is a timed sensor and sent to the appropriate container
-    if(using_id >= 150):
-        USING_CONT_ID = "{0}_{1}_timed".format(
-            SOURCE_NAME.strip().replace(" ", "_").lower(), sens['sensorType'])
-        erval = int(data['v'].strip())
-    else:
-        USING_CONT_ID = "{0}_errors".format(
-            SOURCE_NAME.strip().replace(" ", "_").lower())
-        erval = hex(int(data['v'].strip()))
-
     if(not HAS_CONNECTION):
-        saveToBackLog(sensor, USING_CONT_ID)
+        saveToBackLog(sensor, containerID)
         return 'Operation failed, no internet connection', 500
 
     if(WAS_OFFLINE):
         WAS_OFFLINE = False
         processBackLog()
 
-    insertSensorData(sensor, USING_CONT_ID)
+    insertSensorData(sensor, containerID)
 
     actionLog.append("[Successfully inserted sensor into container {0} with data:] \n[{1}]".format(
-        USING_CONT_ID, data))
+        containerID, data))
     actionLog.append("[Post processed data for LOCAL-ID{0} inserted as:]\n\t{1}".format(
         using_id, "\n\t".join("[{} : {}]".format(k, v) for k, v in sensor.items())))
     actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id, currentDateTime))
@@ -265,8 +262,7 @@ def postSensorData():
         'sensorValue': float(data['v'].strip())
     }
 
-    containerID = "{0}_{1}".format(SOURCE_NAME.strip().replace(
-        " ", "_").lower(), sens['sensorType'])
+    containerID = ("{0}_{1}".format(SOURCE_NAME.strip().replace(" ", "_").lower(), sens['sensorType']))
 
     if(not HAS_CONNECTION):
         saveToBackLog(sensor, containerID)
@@ -280,8 +276,7 @@ def postSensorData():
 
     insertSensorData(sensor, containerID)
 
-    actionLog.append("[Successfully inserted sensor into container {0} with data:] \n[{1}]".format(
-        "{0}_{1}".format(SOURCE_NAME.strip().replace(" ", "_").lower(), sens['sensorType']), data))
+    actionLog.append("[Successfully inserted sensor into container {0} with data:] \n[{1}]".format(containerID, data))
     actionLog.append("[Post processed data for LOCAL-ID{0} inserted as:]\n\t{1}".format(
         using_id, "\n\t".join("[{} : {}]".format(k, v) for k, v in sensor.items())))
     actionLog.append("END-LOCAL-ID{0} - {1}".format(using_id, currentDateTime))
@@ -298,7 +293,7 @@ def insertSensorData(sensor, containerID):
 # Retrieve azure cosmos DB container
 
 
-def getContainer(client, USING_CONT_ID):
+def getContainer(client, containerID):
     try:
         try:
             db = client.create_database(id=DATABASE_ID)
@@ -307,14 +302,14 @@ def getContainer(client, USING_CONT_ID):
             db = client.get_database_client(DATABASE_ID)
             root.info('Database with id \'{0}\' was found'.format(DATABASE_ID))
         try:
-            container = db.create_container(id=USING_CONT_ID, partition_key=PartitionKey(
+            container = db.create_container(id=containerID, partition_key=PartitionKey(
                 path='/partitionKey'), analytical_storage_ttl=-1)
             root.debug(
-                'Container with id \'{0}\' created'.format(USING_CONT_ID))
+                'Container with id \'{0}\' created'.format(containerID))
         except exceptions.CosmosResourceExistsError:
-            container = db.get_container_client(USING_CONT_ID)
+            container = db.get_container_client(containerID)
             root.info(
-                'Container with id \'{0}\' was found'.format(USING_CONT_ID))
+                'Container with id \'{0}\' was found'.format(containerID))
 
     except exceptions.CosmosHttpResponseError as e:
         root.error(

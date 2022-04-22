@@ -10,7 +10,7 @@ else
 	cd $workingDir
 fi
 
-function UOI () {
+function UOI() {
 	cd $workingDir
 	git clone https://github.com/AlexanderADM/grotrian-sensor.git
 	shopt -s dotglob
@@ -22,7 +22,7 @@ function UOI () {
 	pip3 install -r requirements.txt
 }
 
-function run () {
+function run() {
 	git fetch
 	if [ ! -f "app.py" ]; then
 		echo "Python app not found, running update/install function."
@@ -43,10 +43,13 @@ function run () {
 		screen -list 2>/dev/null | grep -q $session
 		if [ $? != 0 ]; then
 			echo "The script is not running, rebooting the script."
-  			screen -dmS $session python3 app.py
+			screen -dmS $session python3 app.py
 			echo "Script is now running in session \'sensorInput\'."
 		fi
 	fi
 }
 
-while true; do run & sleep 60m; done
+while true; do
+	run &
+	sleep 60m
+done
