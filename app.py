@@ -98,10 +98,10 @@ except ValueError as e:
 HAS_CONNECTION = True;
 WAS_OFFLINE = False;
 
-if not exists('no_connection_backlog.json'):
-    open('no_connection_backlog.json', 'x', encoding='utf-8').close()
-    root.error(
-        'No no_connection_backlog list file present, created empty file to prevent execution failure.')
+# if not exists('no_connection_backlog.json'):
+#     open('no_connection_backlog.json', 'x', encoding='utf-8').close()
+#     root.error(
+#         'No no_connection_backlog list file present, created empty file to prevent execution failure.')
 
 # Default route
 
@@ -183,12 +183,12 @@ def postSensorErrorData():
     }
 
     if(not HAS_CONNECTION):
-        saveToBackLog(sensor, containerID)
+        #saveToBackLog(sensor, containerID)
         return 'Operation failed, no internet connection', 500
 
     if(WAS_OFFLINE):
         WAS_OFFLINE = False
-        processBackLog()
+        #processBackLog()
 
     insertSensorData(sensor, containerID)
 
@@ -265,12 +265,12 @@ def postSensorData():
     containerID = ("{0}_{1}".format(SOURCE_NAME.strip().replace(" ", "_").lower(), sens['sensorType']))
 
     if(not HAS_CONNECTION):
-        saveToBackLog(sensor, containerID)
+        #saveToBackLog(sensor, containerID)
         return 'Operation failed, no internet connection', 500
 
     if(WAS_OFFLINE):
         WAS_OFFLINE = False
-        processBackLog()
+        #processBackLog()
 
     # Insert the sensor after processing into the database
 
